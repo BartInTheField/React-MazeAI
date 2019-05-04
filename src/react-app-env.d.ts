@@ -2,6 +2,10 @@
 /// <reference types="react" />
 /// <reference types="react-dom" />
 
+interface Window {
+  initialReduxState;
+}
+
 declare namespace NodeJS {
   interface ProcessEnv {
     NODE_ENV: 'development' | 'production' | 'test';
@@ -35,8 +39,8 @@ declare module '*.png' {
 }
 
 declare module '*.webp' {
-    const src: string;
-    export default src;
+  const src: string;
+  export default src;
 }
 
 declare module '*.svg' {

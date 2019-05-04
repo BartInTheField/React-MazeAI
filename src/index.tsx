@@ -1,24 +1,29 @@
-import React, { useState } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import { existy, unexisty } from './utils/functional';
+import { Provider } from 'react-redux';
+import { configureStore } from './store';
+import { createHashHistory } from 'history';
+import { ConnectedRouter } from 'connected-react-router';
+import Routes from './routes';
 
 import './styles.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'shards-ui/dist/css/shards.min.css';
-import Maze from './containers/Maze';
-import SelectMaze from './containers/SelectMaze';
 
-const App = () => {
-  const [maze, setMaze] = useState(undefined);
+const initialState = window.initialReduxState;
+
+const history = createHashHistory();
+const store = configureStore(history, initialState);
+
+const Root = () => {
   return (
-    <>
-      {existy(maze) && <Maze />}
-      {unexisty(maze) && (
-        <SelectMaze selectMaze={(newMaze: any) => console.log(newMaze)} />
-      )}
-    </>
+    <Provider store={store}>
+      <ConnectedRouter history={history}>
+        <Routes />
+      </ConnectedRouter>
+    </Provider>
   );
 };
 
 const rootElement = document.getElementById('root');
-ReactDOM.render(<App />, rootElement);
+ReactDOM.render(<Root />, rootElement);

@@ -1,40 +1,72 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { Container, Row, Col, Card, CardBody, CardImg } from 'shards-react';
-import { getMazeFiles } from '../mazes/mazes';
+import { Container, Row, Col, Card, CardBody } from 'shards-react';
+import MazeImage from '../components/MazeImage';
+import { ApplicationState } from '../store';
+import { Dispatch } from 'redux';
+import { fetchMazes } from '../store/actions/maze';
+import { connect } from 'react-redux';
+import { arrayIsNotEmpty, existy } from '../utils/functional';
+import { RouteComponentProps } from 'react-router-dom';
 
-const MazeImg = styled(CardImg)`
-  image-rendering: pixelated; // Only works on Chrome
-  height: auto;
-  width: 100%;
+const SelectMazeCol = styled(Col)`
+  transition: transform 0.2s;
+
+  &:hover {
+    cursor: pointer;
+    transform: scale(1.1);
+  }
 `;
 
-interface Props {
-  selectMaze: any;
-}
-const SelectMaze = ({ selectMaze }: Props) => {
-  const mazes = getMazeFiles();
+const mapStateToProps = (state: ApplicationState) => ({
+  maze: state.maze,
+});
+const mapDispatchToProps = (dispatch: Dispatch) => {
+  return {
+    fetchMazes: () => dispatch(fetchMazes()),
+  };
+};
 
-  const clickMaze = (maze: any) => {
-    selectMaze(maze);
+type Props = ReturnType<typeof mapStateToProps> &
+  ReturnType<typeof mapDispatchToProps> &
+  RouteComponentProps;
+
+const SelectMaze = ({ maze, fetchMazes, history }: Props) => {
+  const { mazes, isLoading, error } = maze;
+
+  useEffect(() => {
+    fetchMazes();
+  }, [fetchMazes]);
+
+  const clickMaze = (maze: Maze) => {
+    history.push(`/play/${maze.id}`);
   };
 
   return (
     <Container className="pt-5">
-      <Row>
-        {mazes.map((maze, index) => (
-          <Col lg="3" onClick={() => clickMaze(maze)} key={index}>
-            <Card>
-              <MazeImg src={`../mazes/${maze.path}`} />
-              <CardBody>
-                {maze.name} with name {maze.path}
-              </CardBody>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      {isLoading && <div>Loading ...</div>}
+      {existy(error) && <div>Something went wrong!</div>}
+      {arrayIsNotEmpty(mazes) && (
+        <Row>
+          {mazes.map((maze: Maze, index: number) => (
+            <SelectMazeCol key={index} lg="3" onClick={() => clickMaze(maze)}>
+              <Card>
+                <MazeImage
+                  height="auto"
+                  width="100%"
+                  src={`../mazes/${maze.path}`}
+                />
+                <CardBody>{maze.name}</CardBody>
+              </Card>
+            </SelectMazeCol>
+          ))}
+        </Row>
+      )}
     </Container>
   );
 };
 
-export default SelectMaze;
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SelectMaze);
