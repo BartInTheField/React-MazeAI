@@ -1,12 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import { existy, unexisty } from './utils/functional';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+import './styles.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'shards-ui/dist/css/shards.min.css';
+import Maze from './containers/Maze';
+import SelectMaze from './containers/SelectMaze';
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+const App = () => {
+  const [maze, setMaze] = useState(undefined);
+  return (
+    <>
+      {existy(maze) && <Maze />}
+      {unexisty(maze) && (
+        <SelectMaze selectMaze={(newMaze: any) => console.log(newMaze)} />
+      )}
+    </>
+  );
+};
+
+const rootElement = document.getElementById('root');
+ReactDOM.render(<App />, rootElement);
